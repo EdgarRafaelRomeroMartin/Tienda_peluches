@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Carrito - Tienda de Peluches</title>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<header class="top-bar">
+    <h1 class="logo">Tienda de Peluches 🧸</h1>
+</header>
+
+<nav class="menu">
+    <a href="index.html">Inicio</a>
+    <a href="peluches.html">Peluches</a>
+    <a href="flores.html">Flores</a>
+    <a href="otros.html">Otros</a>
+    <a href="carrito.html">Carrito</a>
+</nav>
+
+<main class="carrito">
+    <h2>Carrito de compras</h2>
+
+    <table class="tabla-carrito">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="lista-carrito"></tbody>
+    </table>
+
+    <h3>Total a pagar: $<span id="total">0</span></h3>
+    <button onclick="finalizarVenta()" style="background: green; color: white; padding: 10px;">
+    FINALIZAR COMPRA (Venta)
+    </button>
+    <button onclick="vaciarCarrito()">Vaciar carrito</button>
+</main>
+
+<script src="js/script.js"></script>
+</body>
+</html>

@@ -1,21 +1,16 @@
-/* =========================
-    CONTROL DE ACCESO (EL GUARDIA)
-========================= */
 const usuarioLogueado = JSON.parse(localStorage.getItem("usuarioLogueado")) || null;
 const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
 
 function checkSeguridad() {
     const href = window.location.href;
-    // Si no hay sesión y no estamos en login o registro, rebota al login
+    
     if (!usuarioLogueado && !href.includes("login.html") && !href.includes("registro.html")) {
         window.location.href = "login.html";
     }
 }
 checkSeguridad();
 
-/* =========================
-    BASE DE DATOS DE PRODUCTOS
-========================= */
+//Datos y tal
 const productos = {
     peluches: [
         { id: 1, nombre: "Osito", precio: 450, imagen: "imagensitas/osito.png" },
@@ -33,9 +28,7 @@ const productos = {
 
 let carrito = usuarioLogueado ? usuarioLogueado.carrito : [];
 
-/* =========================
-    LÓGICA DE PROMEDIOS GLOBAL
-========================= */
+//Promedio de los favoritos
 function obtenerPromedioProducto(idProducto) {
     let suma = 0;
     let cantidad = 0;
@@ -53,9 +46,61 @@ function obtenerPromedioProducto(idProducto) {
     return `${promedio} ⭐ (${cantidad} votos)`;
 }
 
-/* =========================
-    FUNCIONES DE LA TIENDA
-========================= */
+function cantidadFavoritosPermitidos(totalProductos) {
+    if (totalProductos <= 3) return 1;
+    if (totalProductos <= 6) return 2;
+    return 3;
+}
+
+function obtenerFavoritos(categoria) {
+    const lista = productos[categoria];
+
+    const productosConPromedio = lista.map(p => {
+        let suma = 0;
+        let cantidad = 0;
+
+        usuarios.forEach(u => {
+            if (u.calificaciones && u.calificaciones[p.id]) {
+                suma += parseInt(u.calificaciones[p.id]);
+                cantidad++;
+            }
+        });
+
+        const promedio = cantidad === 0 ? 0 : suma / cantidad;
+
+        return { ...p, promedio };
+    });
+
+    productosConPromedio.sort((a, b) => b.promedio - a.promedio);
+
+    const limite = cantidadFavoritosPermitidos(lista.length);
+    return productosConPromedio.slice(0, limite);
+}
+
+function mostrarFavoritos() {
+    if (typeof categoria === "undefined") return;
+
+    const contenedor = document.getElementById("lista-favoritos");
+    if (!contenedor) return;
+
+    const favoritos = obtenerFavoritos(categoria);
+
+    contenedor.innerHTML = "";
+
+    favoritos.forEach(p => {
+        contenedor.innerHTML += `
+            <div class="producto favorito">
+                <img src="${p.imagen}">
+                <h3>${p.nombre}</h3>
+                <p><strong>⭐ Promedio:</strong> ${p.promedio.toFixed(1)}</p>
+                <p>Precio: $${p.precio}</p>
+            </div>
+        `;
+    });
+}
+
+//Funcion de la tienda
+
 function mostrarProductos() {
     if (typeof categoria === "undefined") return;
     const contenedor = document.getElementById("productos");
@@ -90,17 +135,14 @@ function agregarAlCarrito(producto) {
         carrito.push({ ...producto, cantidad: 1 });
     }
     guardarCarrito();
-    // No hay alert, pero si quieres puedes añadir un console.log o un aviso visual
+  
 }
 
-/* =========================
-    LÓGICA DEL CARRITO (ESTO FALTABA)
-========================= */
+//Logica del carritini y tal
 function actualizarCarrito() {
     const lista = document.getElementById("lista-carrito");
     const totalSpan = document.getElementById("total");
-    if (!lista || !totalSpan) return; // Si no estamos en la página del carrito, no hace nada
-
+    if (!lista || !totalSpan) return; 
     lista.innerHTML = "";
     let total = 0;
 
@@ -140,7 +182,7 @@ function vaciarCarrito() {
 function finalizarVenta() {
     if (carrito.length === 0) return;
 
-    // Al comprar, los IDs de los productos pasan a la lista de "compras" del usuario
+    // pasa los id de los productos que se compran y tal
     carrito.forEach(p => {
         if (!usuarioLogueado.compras.includes(p.id)) {
             usuarioLogueado.compras.push(p.id);
@@ -152,9 +194,8 @@ function finalizarVenta() {
     window.location.href = "index.html"; 
 }
 
-/* =========================
-    SISTEMA DE CALIFICACIÓN
-========================= */
+//SISTEMA DE CALIFICACIÓN
+
 function puedeCalificar(idProducto) {
     return usuarioLogueado && usuarioLogueado.compras.includes(idProducto);
 }
@@ -181,16 +222,14 @@ function calificar(idProducto, estrellas) {
     mostrarProductos();
 }
 
-/* =========================
-    PERSISTENCIA Y SESIÓN
-========================= */
+//PERSISTENCIA Y SESIÓN
 function guardarCarrito() {
     if (usuarioLogueado) {
         usuarioLogueado.carrito = carrito;
-        // Guardar en la sesión actual
+        // Guardar en la seión 
         localStorage.setItem("usuarioLogueado", JSON.stringify(usuarioLogueado));
         
-        // Sincronizar con la base de datos de usuarios global
+        // Sincronizar la wea de usuarios :3
         const index = usuarios.findIndex(u => u.user === usuarioLogueado.user);
         if (index !== -1) {
             usuarios[index].carrito = carrito;
@@ -241,10 +280,13 @@ function logout() {
 document.addEventListener("DOMContentLoaded", () => {
     if (usuarioLogueado) {
         const navInfo = document.getElementById("nombre-usuario");
-        if(navInfo) navInfo.textContent = `Hola, ${usuarioLogueado.user}`;
+        if (navInfo) navInfo.textContent = `Hola, ${usuarioLogueado.user}`;
+
         const btnLogout = document.getElementById("btn-logout");
-        if(btnLogout) btnLogout.style.display = "inline";
+        if (btnLogout) btnLogout.style.display = "inline";
     }
-    mostrarProductos();   // Dibuja productos si estamos en peluches/flores/otros
-    actualizarCarrito(); // Dibuja la tabla si estamos en carrito.html
+
+    mostrarFavoritos();   
+    mostrarProductos();
+    actualizarCarrito();
 });

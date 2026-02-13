@@ -168,3 +168,18 @@ button {
 .tabla-carrito img {
     border-radius: 8px;
 }
+#favoritos {
+    padding: 20px;
+    background: #fff0f6;
+}
+
+.favoritos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.producto.favorito {
+    border: 3px solid gold;
+    background: #fff;
+}
